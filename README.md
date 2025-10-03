@@ -1,15 +1,27 @@
-# Codeguide Starter Fullstack
+# AI Business Finance Tracker
 
-A modern web application starter template built with Next.js 15, featuring authentication, database integration, and dark mode support.
+A comprehensive business finance tracking application powered by artificial intelligence. Transform your financial management with natural language input, AI-powered insights, and beautiful visualizations.
 
-## Tech Stack
+## 🚀 Key Features
+
+- **🤖 AI-Powered Data Entry**: Log transactions and assets using natural language
+- **📊 Financial Dashboard**: Real-time visualizations of income, expenses, and cash flow
+- **💡 AI Insights**: Personalized financial recommendations and trend analysis
+- **🏦 Account Management**: Track multiple financial accounts and balances
+- **📈 Asset Tracking**: Monitor business assets and net worth
+- **🔐 Secure Authentication**: User authentication with Better Auth
+- **📱 Responsive Design**: Works perfectly on desktop and mobile devices
+
+## 🛠 Tech Stack
 
 - **Framework:** [Next.js 15](https://nextjs.org/) (App Router with Turbopack)
 - **Language:** TypeScript
+- **AI Model:** [GPT-4o](https://openai.com/) (OpenAI API)
 - **Authentication:** [Better Auth](https://better-auth.com/)
 - **Database:** [Drizzle ORM](https://orm.drizzle.team/) with PostgreSQL
 - **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
 - **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (New York style)
+- **Charts:** [Recharts](https://recharts.org/) for data visualization
 - **Theme System:** [next-themes](https://github.com/pacocoursey/next-themes)
 - **Icons:** [Lucide React](https://lucide.dev/)
 
@@ -89,7 +101,7 @@ Create a `.env` file in the root directory with the following variables:
 
 ```env
 # Database Configuration (defaults work with Docker)
-DATABASE_URL=postgresql://postgres:postgres@localhost:5433/postgres
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
 POSTGRES_DB=postgres
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
@@ -98,20 +110,86 @@ POSTGRES_PASSWORD=postgres
 BETTER_AUTH_SECRET=your_secret_key_here
 BETTER_AUTH_URL=http://localhost:3000
 NEXT_PUBLIC_BETTER_AUTH_URL=http://localhost:3000
+
+# OpenAI API for AI Features
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-## Features
+## 🌟 Application Features
 
-- 🔐 Authentication with Better Auth (email/password)
-- 🗄️ PostgreSQL Database with Drizzle ORM
-- 🎨 40+ shadcn/ui components (New York style)
-- 🌙 Dark mode with system preference detection
-- 🚀 App Router with Server Components and Turbopack
-- 📱 Responsive design with TailwindCSS v4
-- 🎯 Type-safe database operations
-- 🔒 Modern authentication patterns
-- 🐳 Full Docker support with multi-stage builds
-- 🚀 Production-ready deployment configuration
+### 🤖 AI Assistant
+- **Natural Language Processing**: Describe transactions in plain English
+- **Smart Data Extraction**: AI automatically identifies amount, category, date, and description
+- **Asset Registration**: Add business assets using conversational input
+- **Real-time Confirmation**: Review parsed data before saving
+
+### 📊 Financial Dashboard
+- **Income vs Expense Charts**: Visual comparison with multiple time ranges
+- **Category Breakdowns**: Pie charts showing expense distribution
+- **Monthly Trends**: Track performance over time with line charts
+- **Key Metrics**: Cash flow, net worth, and account balances at a glance
+- **Recent Activity**: Latest transactions and asset additions
+
+### 💡 AI Insights
+- **Automated Analysis**: AI analyzes your spending patterns and financial trends
+- **Actionable Recommendations**: Personalized tips for improving financial health
+- **Trend Detection**: Identify opportunities and potential risks
+- **Regular Updates**: Generate new insights based on recent activity
+
+### 🏦 Account Management
+- **Multiple Account Types**: Bank accounts, credit cards, cash, investments
+- **Balance Tracking**: Real-time updates with automatic calculations
+- **Easy Organization**: Group and categorize accounts by purpose
+- **Simple Setup**: Quick account creation with initial balances
+
+### 📈 Asset Tracking
+- **Business Asset Registry**: Track equipment, property, and investments
+- **Value Monitoring**: Monitor appreciation and depreciation over time
+- **Net Worth Calculation**: Complete financial picture including all assets
+- **Acquisition Tracking**: Record purchase dates and initial values
+
+### 🔐 Security & Privacy
+- **User Authentication**: Secure login with Better Auth
+- **Data Encryption**: Financial data protected with encryption
+- **Complete Privacy**: Each user's data is strictly isolated
+- **Modern Security**: Following security best practices
+
+## 📁 Project Structure
+
+```
+business-finance-tracker-ai/
+├── app/                        # Next.js app router pages
+│   ├── dashboard/             # Main dashboard with tabs
+│   ├── api/                   # API endpoints
+│   │   ├── ai/               # AI parsing endpoints
+│   │   ├── transactions/     # Transaction CRUD
+│   │   ├── accounts/         # Account management
+│   │   ├── assets/           # Asset tracking
+│   │   ├── insights/         # AI insights
+│   │   └── auth/             # Authentication
+│   ├── globals.css           # Global styles with dark mode
+│   ├── layout.tsx            # Root layout with providers
+│   └── page.tsx              # Marketing landing page
+├── components/                # React components
+│   ├── finance/              # Finance-specific components
+│   │   ├── ai-assistant.tsx
+│   │   ├── financial-dashboard.tsx
+│   │   ├── accounts-manager.tsx
+│   │   └── insights-panel.tsx
+│   └── ui/                   # shadcn/ui components
+├── db/                       # Database configuration
+│   ├── schema/               # Database schemas
+│   │   ├── auth.ts          # Authentication schema
+│   │   └── finance.ts       # Finance tables
+│   └── index.ts             # Database connection
+├── lib/                      # Utility functions
+│   ├── auth.ts              # Better Auth configuration
+│   ├── ai-insights.ts       # AI insights generation
+│   └── utils.ts             # General utilities
+├── docker-compose.yml        # Docker services configuration
+├── Dockerfile               # Application container definition
+└── drizzle.config.ts        # Drizzle configuration
+```
 
 ## Project Structure
 

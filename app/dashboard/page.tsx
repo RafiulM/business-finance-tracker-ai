@@ -1,18 +1,42 @@
-import { ChartAreaInteractive } from "@//components/chart-area-interactive"
-import { DataTable } from "@//components/data-table"
-import { SectionCards } from "@//components/section-cards"
-import data from "@/app/dashboard/data.json"
+import FinancialDashboard from "@/components/finance/financial-dashboard"
+import AIAssistant from "@/components/finance/ai-assistant"
+import AccountsManager from "@/components/finance/accounts-manager"
+import InsightsPanel from "@/components/finance/insights-panel"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function Page() {
   return (
-    <div className="@container/main flex flex-1 flex-col gap-2">
-      <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-        <SectionCards />
-        <div className="px-4 lg:px-6">
-          <ChartAreaInteractive />
-        </div>
-        <DataTable data={data} />
-      </div>
+    <div className="flex flex-1 flex-col gap-6 p-6">
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="assistant">AI Assistant</TabsTrigger>
+          <TabsTrigger value="insights">Insights</TabsTrigger>
+          <TabsTrigger value="accounts">Accounts</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="dashboard" className="space-y-6">
+          <FinancialDashboard />
+        </TabsContent>
+
+        <TabsContent value="assistant" className="space-y-6">
+          <div className="max-w-4xl mx-auto">
+            <AIAssistant />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="insights" className="space-y-6">
+          <div className="max-w-4xl mx-auto">
+            <InsightsPanel />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="accounts" className="space-y-6">
+          <div className="max-w-4xl mx-auto">
+            <AccountsManager />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
