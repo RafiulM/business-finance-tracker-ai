@@ -1,0 +1,901 @@
+openapi: 3.0.3
+info:
+  title: Business Finance Tracker API
+  description: API for AI-powered business finance tracking system
+  version: 1.0.0
+  contact:
+    name: API Support
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://api.financetracker.com/api
+    description: Production server
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Authentication endpoints
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user and return session
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  session:
+                    type: string
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Create new user account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+                - name
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  minLength: 8
+                name:
+                  type: string
+                  minLength: 2
+                businessName:
+                  type: string
+                  minLength: 2
+                baseCurrency:
+                  type: string
+                  default: USD
+                  pattern: '^[A-Z]{3}$'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  session:
+                    type: string
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Transaction endpoints
+  /transactions:
+    get:
+      tags:
+        - Transactions
+      summary: List transactions
+      description: Get paginated list of user transactions
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+        - name: category
+          in: query
+          schema:
+            type: string
+          description: Filter by category ID
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [expense, income, asset_purchase, asset_sale]
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: search
+          in: query
+          schema:
+            type: string
+            description: Search in description and metadata
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  total:
+                    type: integer
+                  filtered:
+                    type: integer
+
+    post:
+      tags:
+        - Transactions
+      summary: Create transaction
+      description: Create new transaction with optional AI categorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - description
+                - amount
+                - date
+              properties:
+                description:
+                  type: string
+                  minLength: 3
+                  maxLength: 500
+                  description: Natural language transaction description
+                amount:
+                  type: integer
+                  minimum: 1
+                  description: Amount in cents
+                currency:
+                  type: string
+                  default: USD
+                  pattern: '^[A-Z]{3}$'
+                date:
+                  type: string
+                  format: date
+                categoryId:
+                  type: string
+                  description: Category ID (optional for AI categorization)
+                type:
+                  type: string
+                  enum: [expense, income, asset_purchase, asset_sale]
+                  default: expense
+                metadata:
+                  type: object
+                  properties:
+                    vendor:
+                      type: string
+                    location:
+                      type: string
+                    notes:
+                      type: string
+                    receiptUrl:
+                      type: string
+                      format: uri
+      responses:
+        '201':
+          description: Transaction created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /transactions/{id}:
+    get:
+      tags:
+        - Transactions
+      summary: Get transaction
+      description: Get specific transaction by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transaction retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Transactions
+      summary: Update transaction
+      description: Update transaction details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  minLength: 3
+                  maxLength: 500
+                amount:
+                  type: integer
+                  minimum: 1
+                categoryId:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                metadata:
+                  type: object
+      responses:
+        '200':
+          description: Transaction updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Transactions
+      summary: Delete transaction
+      description: Soft delete transaction (maintains audit trail)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Transaction deleted successfully
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # AI Assistant endpoints
+  /ai/process-transaction:
+    post:
+      tags:
+        - AI Assistant
+      summary: Process transaction with AI
+      description: Use AI to categorize and enrich transaction data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - description
+                - amount
+              properties:
+                description:
+                  type: string
+                  minLength: 3
+                  maxLength: 500
+                amount:
+                  type: integer
+                  minimum: 1
+                currency:
+                  type: string
+                  default: USD
+                  pattern: '^[A-Z]{3}$'
+                context:
+                  type: object
+                  properties:
+                    recentTransactions:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/TransactionSummary'
+                    userCategories:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/CategorySummary'
+      responses:
+        '200':
+          description: Transaction processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    $ref: '#/components/schemas/CategorySummary'
+                  confidence:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                  processedDescription:
+                    type: string
+                  extractedMetadata:
+                    type: object
+                    properties:
+                      vendor:
+                        type: string
+                      location:
+                        type: string
+                      tags:
+                        type: array
+                        items:
+                          type: string
+                  suggestions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        value:
+                          type: string
+                        confidence:
+                          type: number
+
+  /ai/generate-insights:
+    post:
+      tags:
+        - AI Assistant
+      summary: Generate financial insights
+      description: Generate AI-powered insights based on user data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timePeriod:
+                  type: object
+                  properties:
+                    startDate:
+                      type: string
+                      format: date
+                    endDate:
+                      type: string
+                      format: date
+                focusAreas:
+                  type: array
+                  items:
+                    type: string
+                    enum: [spending_trends, anomalies, cash_flow, category_analysis, recommendations]
+      responses:
+        '200':
+          description: Insights generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  insights:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Insight'
+
+  # Category endpoints
+  /categories:
+    get:
+      tags:
+        - Categories
+      summary: List categories
+      description: Get user categories organized by type
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [expense, income, asset]
+        - name: includeInactive
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categories:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+
+    post:
+      tags:
+        - Categories
+      summary: Create category
+      description: Create new transaction category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - type
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                  maxLength: 50
+                description:
+                  type: string
+                  maxLength: 200
+                type:
+                  type: string
+                  enum: [expense, income, asset]
+                parentId:
+                  type: string
+                  format: uuid
+                color:
+                  type: string
+                  pattern: '^#[0-9A-Fa-f]{6}$'
+                  default: '#6B7280'
+                icon:
+                  type: string
+      responses:
+        '201':
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # Dashboard endpoints
+  /dashboard/overview:
+    get:
+      tags:
+        - Dashboard
+      summary: Get dashboard overview
+      description: Get financial overview data for dashboard
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [7d, 30d, 90d, 1y, all]
+            default: 30d
+        - name: currency
+          in: query
+          schema:
+            type: string
+            pattern: '^[A-Z]{3}$'
+            description: Target currency for conversion
+      responses:
+        '200':
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      totalIncome:
+                        type: integer
+                      totalExpenses:
+                        type: integer
+                      netIncome:
+                        type: integer
+                      transactionCount:
+                        type: integer
+                      averageTransaction:
+                        type: number
+                  trends:
+                    type: object
+                    properties:
+                      incomeTrend:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            date:
+                              type: string
+                              format: date
+                            amount:
+                              type: integer
+                      expenseTrend:
+                        type: array
+                        items:
+                          type: object
+                              properties:
+                            date:
+                              type: string
+                              format: date
+                            amount:
+                              type: integer
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        categoryId:
+                          type: string
+                        categoryName:
+                          type: string
+                        amount:
+                          type: integer
+                        percentage:
+                          type: number
+                        transactionCount:
+                          type: integer
+                  recentInsights:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Insight'
+
+  # Export endpoints
+  /export/transactions:
+    post:
+      tags:
+        - Export
+      summary: Export transactions
+      description: Export transactions in various formats
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                format:
+                  type: string
+                  enum: [csv, json, pdf]
+                  default: csv
+                filters:
+                  type: object
+                  properties:
+                    startDate:
+                      type: string
+                      format: date
+                    endDate:
+                      type: string
+                      format: date
+                    categories:
+                      type: array
+                      items:
+                        type: string
+                    types:
+                      type: array
+                      items:
+                        type: string
+                        enum: [expense, income, asset_purchase, asset_sale]
+                includeMetadata:
+                  type: boolean
+                  default: false
+      responses:
+        '200':
+          description: Export generated successfully
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        businessName:
+          type: string
+        baseCurrency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        timezone:
+          type: string
+        preferences:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        categoryId:
+          type: string
+          format: uuid
+        amount:
+          type: integer
+        currency:
+          type: string
+          pattern: '^[A-Z]{3}$'
+        description:
+          type: string
+        processedDescription:
+          type: string
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum: [expense, income, asset_purchase, asset_sale]
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 100
+        needsReview:
+          type: boolean
+        metadata:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        category:
+          $ref: '#/components/schemas/Category'
+
+    TransactionSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        amount:
+          type: integer
+        category:
+          type: string
+        date:
+          type: string
+          format: date
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        parentId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [expense, income, asset]
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+        icon:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+
+    CategorySummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+          enum: [expense, income, asset]
+
+    Insight:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [spending_trend, anomaly_detection, cash_flow_analysis, category_insight, recommendation, budget_alert]
+        title:
+          type: string
+        description:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 100
+        impact:
+          type: string
+          enum: [high, medium, low]
+        category:
+          type: string
+        timePeriod:
+          type: object
+        data:
+          type: object
+        actions:
+          type: array
+          items:
+            type: object
+        isRead:
+          type: boolean
+        isArchived:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+tags:
+  - name: Authentication
+    description: User authentication and session management
+  - name: Transactions
+    description: Transaction CRUD operations
+  - name: Categories
+    description: Category management
+  - name: AI Assistant
+    description: AI-powered transaction processing and insights
+  - name: Dashboard
+    description: Dashboard data and analytics
+  - name: Export
+    description: Data export functionality

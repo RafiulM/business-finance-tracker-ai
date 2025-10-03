@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
+    "target": "ES2022",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -20,8 +20,37 @@
     ],
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    // Enhanced strict type checking
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true,
+    "noPropertyAccessFromIndexSignature": false, // Allow for flexibility with database records
+    // Additional checks
+    "forceConsistentCasingInFileNames": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "coverage",
+    ".next",
+    "build"
+  ]
 }

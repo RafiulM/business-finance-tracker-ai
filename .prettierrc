@@ -1,10 +1,30 @@
 {
-  "semi": false,
+  "semi": true,
   "plugins": ["prettier-plugin-tailwindcss"],
-  "trailingComma": "es5",
-  "tabWidth": 2,
+  "trailingComma": "all",
+  "singleQuote": false,
   "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "quoteProps": "as-needed",
   "bracketSpacing": true,
+  "bracketSameLine": false,
   "arrowParens": "always",
-  "endOfLine": "auto"
+  "endOfLine": "lf",
+  "embeddedLanguageFormatting": "auto",
+  "overrides": [
+    {
+      "files": "*.json",
+      "options": {
+        "printWidth": 120
+      }
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "printWidth": 80,
+        "proseWrap": "always"
+      }
+    }
+  ]
 }
